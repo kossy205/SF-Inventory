@@ -2,9 +2,21 @@ package com.kosiso.sfinventory.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.kosiso.sfinventory.R
+
+val onest = FontFamily(
+    listOf(
+        Font(R.font.onest_regular, FontWeight.Normal),
+        Font(R.font.onest_medium, FontWeight.Medium),
+        Font(R.font.onest_semibold, FontWeight.SemiBold),
+        Font(R.font.onest_bold, FontWeight.Bold),
+        Font(R.font.onest_black, FontWeight.Black)
+    )
+)
 
 // Set of Material typography styles to start with
 val Typography = Typography(
