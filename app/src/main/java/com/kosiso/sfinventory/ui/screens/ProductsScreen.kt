@@ -113,7 +113,6 @@ fun ProductsScreen(
             ProductListSection(mainViewModel, onNavigateToDetailsScreen)
         }
 
-        // Floating Action Button
         FloatingActionButton(
             onClick = { onNavigateToAddProductScreen() },
             modifier = Modifier
