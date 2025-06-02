@@ -47,6 +47,7 @@ import com.kosiso.sfinventory.ui.viewmodel.MainViewModel
 import java.text.NumberFormat
 import java.util.Locale
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -271,6 +272,7 @@ private fun TotalStockBox(
         }
     }
 }
+
 @Composable
 private fun SpecialTotalStockBox(
     modifier: Modifier,
@@ -348,7 +350,7 @@ private fun SpecialTotalStockBox(
     }
 }
 
-fun floatPercentageValue(value: Int, totalProductItem: Int): Float{
+private fun floatPercentageValue(value: Int, totalProductItem: Int): Float{
     return if(value == 0) 0f else ((value.toFloat()/totalProductItem)*100)
 }
 
@@ -395,7 +397,7 @@ private fun StockChartBox(productList: List<Product>) {
         PieChartData(nearLowStockPercentage, LighterPink),
         PieChartData(lowStockPercentage, LightPink),
         PieChartData(outOfStockPercentage, LightestPink)
-    ).sortedByDescending { it.value }
+    )
     Log.i("stock chart", data.toString())
 
     Box(
@@ -441,9 +443,14 @@ private fun StockChartBox(productList: List<Product>) {
                 modifier = Modifier
                     .fillMaxWidth()
             ){
-                Column {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth(0.7f)
+                ){
 
-                    Row {
+                    Row(
+
+                    ) {
                         Box(
                             modifier = Modifier
                                 .background(Pink)
@@ -451,12 +458,22 @@ private fun StockChartBox(productList: List<Product>) {
                         )
                         Spacer(modifier = Modifier.width(10.dp))
                         Text(
-                            text = "In Stock",
+                            text = "In Stock:",
                             style = TextStyle(
                                 color = Black,
                                 fontFamily = onest,
                                 fontWeight = FontWeight.Medium,
                                 fontSize = 15.sp
+                            )
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
+                        Text(
+                            text = "${inStockPercentage.toInt()}%",
+                            style = TextStyle(
+                                color = Black,
+                                fontFamily = onest,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp
                             )
                         )
                     }
@@ -471,12 +488,22 @@ private fun StockChartBox(productList: List<Product>) {
                         )
                         Spacer(modifier = Modifier.width(10.dp))
                         Text(
-                            text = "Low Stock",
+                            text = "Low Stock:",
                             style = TextStyle(
                                 color = Black,
                                 fontFamily = onest,
                                 fontWeight = FontWeight.Medium,
                                 fontSize = 15.sp
+                            )
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
+                        Text(
+                            text = "${lowStockPercentage.toInt()}%",
+                            style = TextStyle(
+                                color = Black,
+                                fontFamily = onest,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp
                             )
                         )
                     }
@@ -491,12 +518,22 @@ private fun StockChartBox(productList: List<Product>) {
                         )
                         Spacer(modifier = Modifier.width(10.dp))
                         Text(
-                            text = "Near Low Stock",
+                            text = "Near Low Stock:",
                             style = TextStyle(
                                 color = Black,
                                 fontFamily = onest,
                                 fontWeight = FontWeight.Medium,
                                 fontSize = 15.sp
+                            )
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
+                        Text(
+                            text = "${nearLowStockPercentage.toInt()}%",
+                            style = TextStyle(
+                                color = Black,
+                                fontFamily = onest,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp
                             )
                         )
                     }
@@ -511,12 +548,22 @@ private fun StockChartBox(productList: List<Product>) {
                         )
                         Spacer(modifier = Modifier.width(10.dp))
                         Text(
-                            text = "Out Stock",
+                            text = "Out Stock:",
                             style = TextStyle(
                                 color = Black,
                                 fontFamily = onest,
                                 fontWeight = FontWeight.Medium,
                                 fontSize = 15.sp
+                            )
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
+                        Text(
+                            text = "${outOfStockPercentage.toInt()}%",
+                            style = TextStyle(
+                                color = Black,
+                                fontFamily = onest,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp
                             )
                         )
                     }
