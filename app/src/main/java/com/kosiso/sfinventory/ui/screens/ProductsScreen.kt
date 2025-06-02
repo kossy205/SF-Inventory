@@ -19,8 +19,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
@@ -48,6 +50,7 @@ import com.kosiso.sfinventory.ui.viewmodel.MainViewModel
 import java.sql.Timestamp
 import com.kosiso.sfinventory.R
 import com.kosiso.sfinventory.ui.theme.Green
+import com.kosiso.sfinventory.ui.theme.Orange
 import com.kosiso.sfinventory.ui.theme.Pink
 import com.kosiso.sfinventory.ui.theme.Red
 import com.kosiso.sfinventory.ui.theme.Yellow
@@ -59,7 +62,7 @@ import java.util.Locale
 @Composable
 private fun Preview(){
     val product = Product(
-        id = 0,
+        id = "0",
         name = "Pump guage",
         description = "",
         image = "",
@@ -73,20 +76,25 @@ private fun Preview(){
 }
 
 @Composable
-fun ProductsScreen(mainViewModel: MainViewModel, onNavigateToDetailsScreen: (Product) -> Unit){
+fun ProductsScreen(
+    mainViewModel: MainViewModel,
+    onNavigateToDetailsScreen: (Product) -> Unit,
+    onNavigateToAddProductScreen: () -> Unit){
 
     val productList = mainViewModel.productsList.collectAsState().value
     Log.i("products list screen", productList.toString())
 
     Box(
-        contentAlignment = Alignment.Center,
         modifier = Modifier
             .fillMaxSize()
             .background(BackgroundColor)
             .padding(horizontal = 15.dp)
             .padding(bottom = 65.dp)
     ){
-        Column{
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+        ){
 
             Spacer(modifier = Modifier.height(30.dp))
 
@@ -95,14 +103,29 @@ fun ProductsScreen(mainViewModel: MainViewModel, onNavigateToDetailsScreen: (Pro
                 style = TextStyle(
                     color = Black,
                     fontFamily = onest,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 30.sp
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 25.sp
                 )
             )
 
             Spacer(modifier = Modifier.height(15.dp))
 
             ProductListSection(mainViewModel, onNavigateToDetailsScreen)
+        }
+
+        // Floating Action Button
+        FloatingActionButton(
+            onClick = { onNavigateToAddProductScreen() },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp),
+            containerColor = Pink,
+            contentColor = White
+        ) {
+            Icon(
+                imageVector = Icons.Default.Add,
+                contentDescription = "Add Product"
+            )
         }
     }
 }
@@ -172,7 +195,6 @@ private fun SwipeToDelete(
 ){
     val dismissState = rememberSwipeToDismissBoxState()
 
-    // Handle state changes
     if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
         LaunchedEffect(Unit) {
             onDelete()
@@ -328,8 +350,20 @@ private fun ProductItem(product: Product){
                                 )
                             )
                         }
-                        if(product.quantity > 5){
-                            // low stock
+                        if(product.quantity > 5 && product.quantity <= 10){
+                            // near low stock
+                            Text(
+                                text = "Stock: ${product.quantity}",
+                                style = TextStyle(
+                                    color = Orange,
+                                    fontFamily = onest,
+                                    fontWeight = FontWeight.Medium,
+                                    fontSize = 14.sp
+                                )
+                            )
+                        }
+                        if(product.quantity > 10){
+                            // in stock
                             Text(
                                 text = "Stock: ${product.quantity}",
                                 style = TextStyle(

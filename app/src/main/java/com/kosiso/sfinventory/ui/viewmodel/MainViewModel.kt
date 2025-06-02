@@ -20,13 +20,14 @@ class MainViewModel@Inject constructor(val mainRepo: MainRepo): ViewModel() {
     val product: StateFlow<Result<Product>> = _product
 
     init {
+        getProductListFromLocaldb()
         getProductsFromServer()
     }
 
     // get product list from local db
-    fun getProductsFromLocaldb(){
+    fun getProductListFromLocaldb(){
         viewModelScope.launch {
-            mainRepo.getProductsFromLocaldb().collect{
+            mainRepo.getProductListFromLocaldb().collect{
                 _productsList.value = Result.success(it)
                 Log.i("get Products From Localdb", "success: $it")
             }
@@ -34,7 +35,7 @@ class MainViewModel@Inject constructor(val mainRepo: MainRepo): ViewModel() {
     }
 
     // get singular product from local db
-    fun getProductFromLocaldb(id: Int){
+    fun getProductFromLocaldb(id: String){
         viewModelScope.launch {
             val product = mainRepo.getProductFromLocaldb(id)
             _product.value = Result.success(product)
@@ -60,7 +61,7 @@ class MainViewModel@Inject constructor(val mainRepo: MainRepo): ViewModel() {
         viewModelScope.launch {
             mainRepo.insertProductsListIntoLocaldb(products).apply {
                 onSuccess {
-                    getProductsFromLocaldb()
+                    getProductListFromLocaldb()
                     Log.i("insert Products Into Localdb", "success")
                 }
                 onFailure {
@@ -70,10 +71,26 @@ class MainViewModel@Inject constructor(val mainRepo: MainRepo): ViewModel() {
         }
     }
 
-    fun deleteProduct(id: Int){
+    fun deleteProduct(id: String){
         viewModelScope.launch {
             mainRepo.deleteProductFromLocaldb(id)
             mainRepo.deleteProductFromServer(id)
+            getProductListFromLocaldb()
+        }
+    }
+
+    fun updateProduct(product: Product){
+        viewModelScope.launch {
+            mainRepo.updateProductInLocaldb(product)
+            mainRepo.updateProductOnServer(product)
+        }
+    }
+
+    fun addProduct(product: Product){
+        viewModelScope.launch {
+            mainRepo.addProductIntoLocaldb(product)
+            mainRepo.addProductToServer(product)
+            getProductListFromLocaldb()
         }
     }
 

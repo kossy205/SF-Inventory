@@ -9,7 +9,7 @@ import com.kosiso.sfinventory.database.ProductDao
 
 @Database(
     entities = [Product::class],
-    version = 2
+    version = 3
 )
 @TypeConverters(Converters::class)
 abstract class RoomDatabase: RoomDatabase() {

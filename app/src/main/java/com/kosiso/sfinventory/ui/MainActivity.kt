@@ -41,7 +41,7 @@ import com.kosiso.sfinventory.ui.screens.DashboardScreen
 import com.kosiso.sfinventory.ui.screens.ProductDetailsScreen
 import com.kosiso.sfinventory.ui.screens.ProductsScreen
 import com.kosiso.sfinventory.ui.screens.ReportScreen
-import com.kosiso.sfinventory.ui.screens.UpdateProductScreen
+import com.kosiso.sfinventory.ui.screens.EditProductScreen
 import com.kosiso.sfinventory.ui.theme.Black
 import com.kosiso.sfinventory.ui.theme.Pink
 import com.kosiso.sfinventory.ui.theme.White
@@ -79,20 +79,16 @@ class MainActivity : ComponentActivity() {
 
             composable(
                 route = "${RootNav.PRODUCT_DETAILS.route}/{productId}",
-                arguments = listOf(navArgument("productId") { type = NavType.IntType })
+                arguments = listOf(navArgument("productId") { type = NavType.StringType })
             ) { backStackEntry ->
-                val productId = backStackEntry.arguments?.getInt("productId")
-//                val productId: Int = 3
-                Log.i("product id", "product id: $productId")
+                val productId = backStackEntry.arguments?.getString("productId")
+                Log.i("product id 1", "product id: $productId")
                 ProductDetailsScreen(
                     productId = productId!!,
                     mainViewModel = mainViewModel,
                     onBackClick = { rootNavController.popBackStack() },
-                    onNavigateToAddProductScreen = {
-                        rootNavController.navigate(RootNav.ADD_PRODUCT.route)
-                    },
-                    onNavigateToUpdateProductScreen = {
-                        rootNavController.navigate(RootNav.UPDATE_PRODUCT.route)
+                    onNavigateToEditProductScreen = {productId->
+                        rootNavController.navigate("${RootNav.EDIT_PRODUCT.route}/${productId}")
                     }
                 )
             }
@@ -102,8 +98,14 @@ class MainActivity : ComponentActivity() {
                     onBackClick = { rootNavController.popBackStack() }
                 )
             }
-            composable(RootNav.UPDATE_PRODUCT.route) {
-                UpdateProductScreen(
+            composable(
+                route = "${RootNav.EDIT_PRODUCT.route}/{productId}",
+                arguments = listOf(navArgument("productId") { type = NavType.StringType })
+            ) {backStackEntry ->
+                val productId = backStackEntry.arguments?.getString("productId")
+                Log.i("product id 2", "product id: $productId")
+                EditProductScreen(
+                    productId = productId!!,
                     mainViewModel,
                     onBackClick = { rootNavController.popBackStack() }
                 )
@@ -178,6 +180,9 @@ class MainActivity : ComponentActivity() {
                     mainViewModel,
                     onNavigateToDetailsScreen = {product->
                         rootNavController.navigate("${RootNav.PRODUCT_DETAILS.route}/${product.id}")
+                    },
+                    onNavigateToAddProductScreen = {
+                        rootNavController.navigate(RootNav.ADD_PRODUCT.route)
                     }
                 )
                 Log.i("Products screen Clicked", "Products screen Clicked")

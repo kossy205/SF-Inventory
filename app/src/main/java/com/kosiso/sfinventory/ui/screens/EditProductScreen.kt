@@ -25,6 +25,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,6 +38,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kosiso.sfinventory.data.model.Product
@@ -48,14 +50,66 @@ import com.kosiso.sfinventory.ui.theme.onest
 import com.kosiso.sfinventory.ui.viewmodel.MainViewModel
 import java.util.UUID
 import kotlin.text.isBlank
+import kotlin.text.isNotBlank
+import kotlin.text.toIntOrNull
+import kotlin.text.toLongOrNull
+
+@Preview(backgroundColor = 0xFFFFFFFF)
+@Composable
+private fun Preview(){
+
+    Text(
+        text = "Name",
+        style = TextStyle(
+            color = Black.copy(alpha = 0.4f),
+            fontFamily = onest,
+            fontWeight = FontWeight.Normal,
+            fontSize = 13.sp
+        )
+    )
+    OutlinedTextField(
+        value = "Text value",
+        onValueChange = {  },
+        placeholder = {
+            Text(
+                text = "this is placeholder",
+                style = TextStyle(
+                    color = Black.copy(alpha = 0.4f),
+                    fontFamily = onest,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 15.sp
+                )
+            )
+        },
+        textStyle = TextStyle(
+            color = Color.Black,
+            fontSize = 15.sp,
+            fontFamily = onest,
+            fontWeight = FontWeight.Normal
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                Color.Transparent,
+                shape = RoundedCornerShape(12.dp)
+            ),
+        colors = OutlinedTextFieldDefaults.colors(
+            unfocusedBorderColor = Black.copy(alpha = 0.2f),
+            focusedBorderColor = Pink,
+        ),
+        shape = RoundedCornerShape(12.dp)
+    )
+}
+
 
 
 @Composable
-fun AddProductScreen(
+fun EditProductScreen(
+    productId: String,
     mainViewModel: MainViewModel,
     onBackClick: () -> Unit){
 
-    var productToAdd by remember { mutableStateOf<Product?>(null) }
+    var updatedProduct by remember { mutableStateOf<Product?>(null) }
     val context = LocalContext.current
 
     Box(
@@ -70,10 +124,11 @@ fun AddProductScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            AddProductSection(
+            EditProductDetailsSection(
                 mainViewModel,
-                addProduct = {
-                    productToAdd = it
+                productId,
+                updateProduct = {
+                    updatedProduct = it
                 }
             )
 
@@ -119,11 +174,11 @@ fun AddProductScreen(
                 Button(
                     onClick = {
                         Log.i("save product btn", "pressed")
-                        productToAdd?.let { productToAdd->
+                        updatedProduct?.let {updatedProduct->
                             validateForm(
-                                updatedProduct = productToAdd,
+                                updatedProduct = updatedProduct,
                                 onValid = {
-                                    mainViewModel.addProduct(productToAdd)
+                                    mainViewModel.updateProduct(updatedProduct)
                                     onBackClick()
                                 },
                                 context = context
@@ -145,7 +200,7 @@ fun AddProductScreen(
                     )
                 ) {
                     Text(
-                        text = "Add",
+                        text = "Save",
                         style = TextStyle(
                             color = White,
                             fontFamily = onest,
@@ -160,12 +215,17 @@ fun AddProductScreen(
     }
 }
 
-
 @Composable
-private fun AddProductSection(
+private fun EditProductDetailsSection(
     mainViewModel: MainViewModel,
-    addProduct:(Product) -> Unit,
+    productId: String,
+    updateProduct:(Product) -> Unit,
 ){
+
+    mainViewModel.getProductFromLocaldb(productId)
+    val product = mainViewModel.product.collectAsState().value
+    Log.i("edit product details", "product: $product")
+
 
     Box(
         modifier = Modifier
@@ -182,122 +242,102 @@ private fun AddProductSection(
 
         ) {
 
-            var productName by remember { mutableStateOf("") }
-            MyTextField(
-                fieldTitle = "Name",
-                textInput = productName,
-                onTextInputChange = { productName = it },
-                placeholder = "product name"
-            )
+            product.apply {
+                onSuccess {product ->
 
-            Spacer(modifier = Modifier.height(20.dp))
+                    var productName by remember { mutableStateOf(product.name) }
+                    MyTextField(
+                        fieldTitle = "Name",
+                        textInput = productName,
+                        onTextInputChange = { productName = it },
+                        placeholder = product.name
+                    )
 
-            var productDescription by remember { mutableStateOf("") }
-            MyTextField(
-                fieldTitle = "Description",
-                textInput = productDescription,
-                onTextInputChange = { productDescription = it },
-                placeholder = "product description"
-            )
+                    Spacer(modifier = Modifier.height(20.dp))
 
-            Spacer(modifier = Modifier.height(20.dp))
+                    var productDescription by remember { mutableStateOf(product.description) }
+                    MyTextField(
+                        fieldTitle = "Description",
+                        textInput = productDescription,
+                        onTextInputChange = { productDescription = it },
+                        placeholder = product.description
+                    )
 
-            var productQuantity by remember { mutableStateOf("") }
-            MyNumberField(
-                fieldTitle = "Quantity",
-                textInput = productQuantity,
-                onTextInputChange = {
-                    productQuantity = it
-                },
-                placeholder = "34"
-            )
+                    Spacer(modifier = Modifier.height(20.dp))
 
-            Spacer(modifier = Modifier.height(20.dp))
+                    var productQuantity by remember { mutableStateOf(product.quantity.toString()) }
+                    MyNumberField(
+                        fieldTitle = "Quantity",
+                        textInput = productQuantity,
+                        onTextInputChange = {
+                            productQuantity = it
+                        },
+                        placeholder = product.quantity.toString()
+                    )
 
-            var productPrice by remember { mutableStateOf("") }
-            MyNumberField(
-                fieldTitle = "Price",
-                textInput = productPrice,
-                onTextInputChange = {
-                    productPrice = it
-                },
-                placeholder = "79,000"
-            )
+                    Spacer(modifier = Modifier.height(20.dp))
 
-            Spacer(modifier = Modifier.height(20.dp))
+                    var productPrice by remember { mutableStateOf(product.price.toString()) }
+                    MyNumberField(
+                        fieldTitle = "Price",
+                        textInput = productPrice,
+                        onTextInputChange = {
+                            productPrice = it
+                        },
+                        placeholder = product.price.toString()
+                    )
 
-            var productCategory by remember { mutableStateOf("") }
-            MyTextField(
-                fieldTitle = "Category",
-                textInput = productCategory,
-                onTextInputChange = { productCategory = it },
-                placeholder = "product category"
-            )
+                    Spacer(modifier = Modifier.height(20.dp))
 
-            Spacer(modifier = Modifier.height(20.dp))
+                    var productCategory by remember { mutableStateOf(product.category) }
+                    MyTextField(
+                        fieldTitle = "Category",
+                        textInput = productCategory,
+                        onTextInputChange = { productCategory = it },
+                        placeholder = product.category
+                    )
 
-            var productSupplier by remember { mutableStateOf("") }
-            MyTextField(
-                fieldTitle = "Supplier Info",
-                textInput = productSupplier,
-                onTextInputChange = { productSupplier = it },
-                placeholder = "product supplier"
-            )
+                    Spacer(modifier = Modifier.height(20.dp))
 
-            LaunchedEffect(productName, productDescription, productQuantity, productPrice, productCategory, productSupplier) {
-                val quantityInt = if (productQuantity.isNotBlank()) {
-                    productQuantity.toIntOrNull() ?: 0
-                } else {
-                    0
+                    var productSupplier by remember { mutableStateOf(product.supplier) }
+                    MyTextField(
+                        fieldTitle = "Supplier Info",
+                        textInput = productSupplier,
+                        onTextInputChange = { productSupplier = it },
+                        placeholder = product.supplier
+                    )
+
+                    LaunchedEffect(
+                        productName,
+                        productDescription,
+                        productQuantity,
+                        productPrice,
+                        productCategory,
+                        productSupplier) {
+
+                        val quantityInt = productQuantity.toString().toIntOrNull() ?: product.quantity
+                        val priceLong = productPrice.toString().toLongOrNull() ?: product.price
+
+                        val updatedProduct = Product(
+                            id = product.id,
+                            name = productName,
+                            description = productDescription,
+                            image = product.image,
+                            quantity = quantityInt,
+                            price = priceLong,
+                            category = productCategory,
+                            supplier = productSupplier
+                        )
+                        updateProduct(updatedProduct)
+                    }
+
                 }
-
-                val priceLong = if (productPrice.isNotBlank()) {
-                    productPrice.toLongOrNull() ?: 0L
-                } else {
-                    0L
+                onFailure {
+                    Log.i("edit product details", "failed: ${it.message}")
                 }
+            }
 
-                val productToBeAdded = Product(
-                    id = UUID.randomUUID().toString(),
-                    name = productName,
-                    image = "",
-                    description = productDescription,
-                    quantity = quantityInt,
-                    price = priceLong,
-                    category = productCategory,
-                    supplier = productSupplier
-                )
-                addProduct(productToBeAdded)
-            }
         }
-    }
-}
-
-private fun validateForm(updatedProduct: Product, onValid:()-> Unit, context: Context){
-    updatedProduct?.let { product ->
-        // Validate fields
-        when {
-            product.name.isBlank() -> {
-                Toast.makeText(context, "Product name cannot be empty", Toast.LENGTH_SHORT).show()
-            }
-            product.quantity < 0 -> {
-                Toast.makeText(context, "Quantity cannot be negative", Toast.LENGTH_SHORT).show()
-            }
-            product.price <= 0 -> {
-                Toast.makeText(context, "Price must be greater than 0", Toast.LENGTH_SHORT).show()
-            }
-            product.category.isBlank() -> {
-                Toast.makeText(context, "Category cannot be empty", Toast.LENGTH_SHORT).show()
-            }
-            product.supplier.isBlank() -> {
-                Toast.makeText(context, "Supplier cannot be empty", Toast.LENGTH_SHORT).show()
-            }
-            else -> {
-                onValid()
-            }
-        }
-    } ?: run {
-        Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
     }
 }
 
@@ -319,9 +359,9 @@ private fun MyNumberField(
     )
     OutlinedTextField(
         value = textInput,
-        // onValueChange = onTextInputChange,
+//        onValueChange = onTextInputChange,
         onValueChange = { newValue ->
-            // Allow empty input or digits only
+            // Filter to allow only digits
             val filteredValue = newValue.filter { it.isDigit() }
             onTextInputChange(filteredValue)
         },
@@ -359,6 +399,34 @@ private fun MyNumberField(
     )
 }
 
+
+private fun validateForm(updatedProduct: Product, onValid:()-> Unit, context: Context){
+    updatedProduct?.let { product ->
+        // Validate fields
+        when {
+            product.name.isBlank() -> {
+                Toast.makeText(context, "Product name cannot be empty", Toast.LENGTH_SHORT).show()
+            }
+            product.quantity < 0 -> {
+                Toast.makeText(context, "Quantity cannot be negative", Toast.LENGTH_SHORT).show()
+            }
+            product.price <= 0 -> {
+                Toast.makeText(context, "Price must be greater than 0", Toast.LENGTH_SHORT).show()
+            }
+            product.category.isBlank() -> {
+                Toast.makeText(context, "Category cannot be empty", Toast.LENGTH_SHORT).show()
+            }
+            product.supplier.isBlank() -> {
+                Toast.makeText(context, "Supplier cannot be empty", Toast.LENGTH_SHORT).show()
+            }
+            else -> {
+                onValid()
+            }
+        }
+    } ?: run {
+        Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+    }
+}
 
 @Composable
 private fun MyTextField(

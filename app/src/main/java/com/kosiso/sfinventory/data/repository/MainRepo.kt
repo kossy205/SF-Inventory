@@ -5,14 +5,16 @@ import kotlinx.coroutines.flow.Flow
 
 interface MainRepo {
 
-    suspend fun getProductsFromLocaldb(): Flow<List<Product>>
+    suspend fun addProductIntoLocaldb(product: Product)
     suspend fun insertProductsListIntoLocaldb(products: List<Product>): Result<Unit>
-    suspend fun getProductFromLocaldb(id: Int): Product
+    suspend fun updateProductInLocaldb(product: Product)
+    suspend fun getProductListFromLocaldb(): Flow<List<Product>>
+    suspend fun getProductFromLocaldb(id: String): Product
+    suspend fun deleteProductFromLocaldb(id: String)
 
-//    suspend fun insertProductIntoLocaldb(product: Product)
-//    suspend fun updateProductIntoLocaldb(product: Product)
-    suspend fun deleteProductFromLocaldb(id: Int)
-
+    suspend fun addProductToServer(product: Product): Result<Unit>
     suspend fun getProductsFromServer(): Result<List<Product>>
-    suspend fun deleteProductFromServer(id: Int): Result<Unit>
+    suspend fun deleteProductFromServer(id: String): Result<Unit>
+    suspend fun updateProductOnServer(product: Product): Result<Unit>
+
 }

@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -29,6 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kosiso.sfinventory.R
+import com.kosiso.sfinventory.data.model.Product
 import com.kosiso.sfinventory.ui.theme.BackgroundColor
 import com.kosiso.sfinventory.ui.theme.Black
 import com.kosiso.sfinventory.ui.theme.Green
@@ -187,11 +188,11 @@ private fun Preview(){
 
 @Composable
 fun ProductDetailsScreen(
-    productId: Int,
+    productId: String,
     mainViewModel: MainViewModel,
     onBackClick: () -> Unit,
-    onNavigateToAddProductScreen: () -> Unit,
-    onNavigateToUpdateProductScreen: () -> Unit){
+    // the Int here is the product Id
+    onNavigateToEditProductScreen: (String) -> Unit){
 
     Box(
         contentAlignment = Alignment.Center,
@@ -215,11 +216,12 @@ fun ProductDetailsScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically){
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween){
                 Button(
                     onClick = {
-                        Log.i("add product btn", "pressed")
-                        onNavigateToAddProductScreen()
+                        Log.i("delete product btn", "pressed")
+                        mainViewModel.deleteProduct(productId)
                     },
                     modifier = Modifier
                         .weight(0.4f)
@@ -232,11 +234,11 @@ fun ProductDetailsScreen(
                         bottomEnd = 12.dp
                     ),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Pink
+                        containerColor = Black
                     )
                 ) {
                     Text(
-                        text = "Add",
+                        text = "Delete",
                         style = TextStyle(
                             color = White,
                             fontFamily = onest,
@@ -246,12 +248,12 @@ fun ProductDetailsScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.width(10.dp))
 
                 Button(
                     onClick = {
                         Log.i("update product btn", "pressed")
-                        onNavigateToUpdateProductScreen()
+                        onNavigateToEditProductScreen(productId)
                     },
                     modifier = Modifier
                         .weight(0.4f)
@@ -284,7 +286,7 @@ fun ProductDetailsScreen(
 }
 
 @Composable
-private fun ProductDetailsSection(mainViewModel: MainViewModel, productId: Int){
+private fun ProductDetailsSection(mainViewModel: MainViewModel, productId: String){
     mainViewModel.getProductFromLocaldb(productId)
     val product = mainViewModel.product.collectAsState().value
     Log.i("product details", "product: $product")

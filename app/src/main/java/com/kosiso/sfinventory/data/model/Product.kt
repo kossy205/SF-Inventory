@@ -8,7 +8,7 @@ import java.sql.Timestamp
 @Entity(tableName = "products_table")
 data class Product(
     @PrimaryKey()
-    val id: Int = 0,
+    val id: String = "",
     val name: String = "",
     val description: String = "",
     val image: String = "",

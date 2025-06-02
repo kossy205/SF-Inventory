@@ -10,14 +10,27 @@ class MainRepoImpl @Inject constructor(
     val productDao: ProductDao,
     val apiService: ApiService): MainRepo {
 
+        // add product to local db
+    override suspend fun addProductIntoLocaldb(product: Product) {
+        productDao.insertProduct(product)
+    }
+
+    override suspend fun addProductToServer(product: Product): Result<Unit> {
+        return try {
+            apiService.addProduct(product)
+            Result.success(Unit)
+        }catch (e: Exception){
+            Result.failure(e)
+        }
+    }
 
         // get list of product
-    override suspend fun getProductsFromLocaldb(): Flow<List<Product>> {
+    override suspend fun getProductListFromLocaldb(): Flow<List<Product>> {
         return productDao.getAllProducts()
     }
 
     //get singular product with id
-    override suspend fun getProductFromLocaldb(id: Int): Product {
+    override suspend fun getProductFromLocaldb(id: String): Product {
         return productDao.getProductById(id)
     }
 
@@ -43,7 +56,7 @@ class MainRepoImpl @Inject constructor(
         }
     }
 
-    override suspend fun deleteProductFromServer(id: Int): Result<Unit> {
+    override suspend fun deleteProductFromServer(id: String): Result<Unit> {
         return try {
             val deleteProduct = apiService.deleteProduct(id)
             if (deleteProduct.isSuccessful) {
@@ -56,8 +69,21 @@ class MainRepoImpl @Inject constructor(
         }
     }
 
-    override suspend fun deleteProductFromLocaldb(id: Int) {
+    override suspend fun deleteProductFromLocaldb(id: String) {
         return productDao.deleteProductById(id)
+    }
+
+    override suspend fun updateProductInLocaldb(product: Product) {
+        return productDao.updateProduct(product)
+    }
+
+    override suspend fun updateProductOnServer(product: Product): Result<Unit> {
+        return try {
+            apiService.updateProduct(product.id, product)
+            Result.success(Unit)
+        }catch (e: Exception){
+            Result.failure(e)
+        }
     }
 
 }
