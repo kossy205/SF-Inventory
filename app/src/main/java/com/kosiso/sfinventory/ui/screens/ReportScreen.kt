@@ -470,7 +470,7 @@ fun BarChart(
 
             // Draw value above bars
             val valueTextLayout = textMeasurer.measure(
-                text = "${(segment.value * animationProgress.value).toInt()}",
+                text = "${(segment.value * animationProgress.value).toInt()}%",
                 style = TextStyle(
                     color = Color.Black,
                     fontFamily = FontFamily.Default,
